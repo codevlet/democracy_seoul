@@ -23,6 +23,15 @@ public class Survey {
 	
 	
 
+
+
+	public Survey(int proposalNo, String surveyTitle) {
+		super();
+		this.proposalNo = proposalNo;
+		this.surveyTitle = surveyTitle;
+	}
+
+
 	public int getSurveyNo() {
 		return surveyNo;
 	}

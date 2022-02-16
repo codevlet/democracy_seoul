@@ -1,7 +1,11 @@
 package kr.go.seoul.democracy.survey.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,46 +29,55 @@ public class SurveyController {
 		return "survey/adminWriteForm";
 	}
 	
-	/*@RequestMapping(value="/survey/adminWrite.do", method = RequestMethod.POST)
-	public void adminWrite(ModelAndView mav,
+	@RequestMapping(value="/survey/adminWrite.do", method = RequestMethod.POST)
+	public void adminWrite(//HttpServletRequest request,
+							//HttpServletResponse response,
 							//@RequestParam int proposalNo,
 							@RequestParam String title, //설문지 제목
 							@RequestParam String qNo, //몇번까지 작성했는지
-							@RequestParam String contentQValue, // 질문
-							@RequestParam String questionInputType, // 타입
-							@RequestParam String questionContent) { // 번호/문항/문항/문항
+							@RequestParam String[] contentQValue, // 질문
+							@RequestParam String[] questionInputType, // 타입
+							@RequestParam String[] questionContent) throws IOException { // 번호/문항/문항/문항
 		
 		int proposalNo=46;
 		int question=Integer.parseInt(qNo);
-		System.out.println(proposalNo);
-		System.out.println(title);
 		//새 설문 생성
-		Survey survey=new Survey();
+		Survey survey=new Survey(proposalNo,title);
 		int resultSurvey=surveyService.addSurvey(survey);
 		
-		
 		//새 설문 내용
-		String contentQArray[]=contentQValue.split(",");
-		String inputTypeArray[]=questionInputType.split(",");
-		String contentArray[]=null;
+		for(int i=0;i<contentQValue.length;i++) {
+			String[] contentQArray=contentQValue[i].split("/");
+			System.out.println(contentQArray);
+		}
+		
+		/*String[] contentQArray=contentQValue.split(",");
+		System.out.println("5 "+contentQArray);
+		String[] inputTypeArray=questionInputType.split(",");
+		String[] contentArray=null;*/
 		
 		/*String qInputType[]=questionInputType.split(",");
 		for(int i=0;i<qInputType.length;i++) {
 			String qinputType[]=qInputType[i].split("/");
 			inputTypeArray[i]=qinputType[1];
 		}*/
-		
-		/*String question_content[]=questionContent.split(",");
-		for(int i=0;i<question_content.length;i++) {
-			String qContent[]=question_content[i].split("/");
+		/*String[] contentQ1=questionContent.split(",");
+		System.out.println("4 "+contentQ1);
+		for(int i=0;i<contentQ1.length;i++) {
+			String[] contentQ2=contentQ1[i].split("/");
+			System.out.println("1 "+contentQ2);
 			
-			String content=qContent[1];
-			for(int j=2;j<qContent.length;j++) {
-				content+="/"+qContent[j];
+			String content=contentQ2[1];
+			System.out.println("2 "+content);
+			if(contentQ2.length>1) {
+				for(int j=2;j<contentQ2.length;j++) {
+					content += "/"+contentQ2[j];
+				}
 			}
 			contentArray[i]=content;
 		}
 		
+		System.out.println("5 "+contentArray);
 		ArrayList<SurveyQ> list=new ArrayList<SurveyQ>();
 		
 		for(int i=0;i<question;i++) {
@@ -80,10 +93,11 @@ public class SurveyController {
 			list.add(surveyQ);
 		}
 		
-		int resultSurveyQ=surveyService.addQuestion(list);
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=UTF-8");
 		
-		System.out.println(questionContent);
-		System.out.println(questionInputType);
-		System.out.println(contentQValue);
-	}*/
+		int resultSurveyQ=surveyService.addQuestion(list);
+		if(resultSurveyQ>0) response.getWriter().println("<script>alert('설문폼 작성 완료');location.replace('/proposal/allList.do');</script>");
+		else response.sendRedirect("survey/error");*/
+	}
 }
