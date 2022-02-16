@@ -53,12 +53,6 @@ public class ProposalController {
 	@Qualifier("proposalImageTemplate")
 	private ImageResizeTemplate imgTemplate;
 	
-	@RequestMapping(value="/proposal/dw.do", method = RequestMethod.POST)
-	public String test() {
-		return "index";
-	}
-
-	
 	//리스트 불러오기
 	@RequestMapping(value="/proposal/allList.do", method = RequestMethod.GET)
 	public ModelAndView allList(ModelAndView mav,HttpServletRequest request,
@@ -138,15 +132,17 @@ public class ProposalController {
 	// 댓글전송                              
 	@RequestMapping(value="/proposal/writeComment.do", method=RequestMethod.POST)
 	public void comment(@RequestParam int proposalNo,
-			@RequestParam String comment, 
-			@SessionAttribute Member member,
+						@RequestParam String comment,
+						@SessionAttribute("user") Member member,
 			HttpServletResponse response) throws Exception{ 
-		
+
+		System.err.println(proposalNo);
+		System.err.println(comment);
+
 		ProposalComment pcomment = new ProposalComment();
 		pcomment.setProposalNo(proposalNo);
 		pcomment.setUserId(member.getUserId());
 		pcomment.setCommentContent(comment);
-		System.out.println(pcomment);
 		response.getWriter().println(true);
 		pService.comWrite(pcomment);
 	}
@@ -168,9 +164,9 @@ public class ProposalController {
 	@RequestMapping(value="/proposal/proposalWrite.do")
 	public String proposalEnroll(HttpSession session, HttpServletResponse write)throws Exception {
 		
-		String adminId = (String)session.getAttribute("adminId");
+		Admin admin = (Admin)session.getAttribute("admin");
 
-		if (adminId==null) {
+		if (admin==null) {
 			write.setContentType("text/html; charset=UTF-8");
 			PrintWriter out_write = write.getWriter();
 			out_write.println("<script>alert('로그인이 되어있지 않습니다. 로그인을 먼저 해주세요.');</script>");
@@ -200,7 +196,6 @@ public class ProposalController {
         json.addProperty("fileName", info.getFileName());
         json.addProperty("imgUrl", "/upload/proposal/"+info.getFileName("thumbnail"));
         new Gson().toJson(json,response.getWriter());
-        
     }
 
 
@@ -240,7 +235,6 @@ public class ProposalController {
 		if (admin.getAdminGrade() != '0' && admin.getAdminGrade() != '1') return "proposal/allList";
 
 		pService.delete(proposalNo);
-		System.out.println(proposalNo);
 		return "redirect:/proposal/allList.do";
 	}
 	
@@ -254,16 +248,11 @@ public class ProposalController {
 		int naviCountPerPage = 5;
 		int recordTotalCount = pService.resultTotalCount();
 		
-		System.out.println(recordTotalCount);
-		
 		int pageTotalCount = (int)Math.ceil((double)recordTotalCount/recordCountPage); // 
 		int startNavi = currentPage - (currentPage - 1) % naviCountPerPage;
 		int endNavi = startNavi + naviCountPerPage - 1;  //5
 		endNavi = endNavi > pageTotalCount ? pageTotalCount : endNavi; // 5 > 100 ? 100 : 5
 				
-		System.out.println("startNavi : " + startNavi);
-		System.out.println("endNavi : " + endNavi);
-		
 		ArrayList<HashMap<String,Object>> list = pService.resultList(currentPage, recordCountPage);
 		ArrayList<Integer> navi = new ArrayList<>();
 		for (int i = startNavi; i <= endNavi; i++) {
@@ -276,7 +265,6 @@ public class ProposalController {
 		mav.addObject("navi", navi);
 		mav.addObject("preNavi", startNavi > 1 ? startNavi - 1 : 0 );
 		mav.addObject("nextNavi", pageTotalCount > endNavi ? endNavi + 1 : 0 );
-		System.out.println(mav);
 		mav.setViewName("proposal/result");
 
 		return mav;			
